@@ -16,3 +16,6 @@ Run app
 ```
 flask --app oidc run --cert=adhoc --debug
 ```
+
+## Reference
+[Authlib reference for OIDC Flask](https://docs.authlib.org/en/latest/client/flask.html)

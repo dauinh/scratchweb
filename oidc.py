@@ -1,3 +1,5 @@
+import requests
+
 from flask import Flask, url_for, session
 from flask import render_template, redirect
 from authlib.integrations.flask_client import OAuth
@@ -41,8 +43,19 @@ def login():
 @app.route('/auth')
 def auth():
     token = oauth.pressingly.authorize_access_token()
-    return redirect('/')
+    if token:
+        session['token'] = token
+    return redirect('/profile')
 
+
+@app.route('/profile')
+def profile():
+    token = session['token']
+    access_token = token['access_token']
+    userInfoEndpoint = f'{CONF_URL}/oauth/userinfo'
+    userInfoResponse = requests.post(userInfoEndpoint,
+                                    headers={'Authorization': f'Bearer {access_token}', 'Accept': 'application/json'})
+    return render_template('profile.html', data=userInfoResponse.json())
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', debug=True, ssl_context="adhoc")
