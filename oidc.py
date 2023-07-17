@@ -1,5 +1,3 @@
-import requests
-
 from flask import Flask, url_for, session
 from flask import render_template, redirect
 from authlib.integrations.flask_client import OAuth
@@ -7,6 +5,8 @@ from authlib.integrations.flask_client import OAuth
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import login_required, UserManager, UserMixin
+
+import utils
 
 CONF_URL = 'https://pressingly-account.onrender.com'
 
@@ -87,7 +87,11 @@ def create_app():
             token = oauth.pressingly.authorize_access_token()
             if token:
                 session['token'] = token
-            return redirect('/profile')
+                username, email = utils.get_user_info(token)
+                pressingly_user = User(username=username)
+                db.session.add(pressingly_user)
+                db.session.commit()
+                return redirect('/profile')
 
 
         @app.route('/logout')
@@ -97,16 +101,12 @@ def create_app():
 
 
         @app.route('/profile')
-        @login_required
         def profile():
             token = session['token']
             if not token:
                 return redirect('/login')
-            access_token = token['access_token']
-            userInfoEndpoint = f'{CONF_URL}/oauth/userinfo'
-            userInfoResponse = requests.post(userInfoEndpoint,
-                                            headers={'Authorization': f'Bearer {access_token}', 'Accept': 'application/json'})
-            return render_template('profile.html', data=userInfoResponse.json())
+            username, _ = utils.get_user_info(token)
+            return render_template('profile.html', data=username)
     return app
 
 
