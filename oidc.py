@@ -5,6 +5,7 @@ from authlib.integrations.flask_client import OAuth
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import login_required, UserManager, UserMixin
+from flask_login import LoginManager, login_user
 
 import utils
 
@@ -22,6 +23,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object('config')
     app.secret_key = app.config['APP_SECRET']
+
+    login_manager = LoginManager(app)
 
     # Setup Flask-SQLAlchemy
     db.init_app(app)
@@ -88,9 +91,12 @@ def create_app():
             if token:
                 session['token'] = token
                 username, email = utils.get_user_info(token)
-                pressingly_user = User(username=username)
-                db.session.add(pressingly_user)
-                db.session.commit()
+                user = User.query.filter_by(username=username).first()
+                if not user:
+                    user = User(username=username)
+                    db.session.add(user)
+                    db.session.commit()
+                login_user(user)
                 return redirect('/profile')
 
 
@@ -101,6 +107,7 @@ def create_app():
 
 
         @app.route('/profile')
+        @login_required
         def profile():
             token = session['token']
             if not token:
