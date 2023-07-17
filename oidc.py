@@ -12,21 +12,20 @@ import utils
 CONF_URL = 'https://pressingly-account.onrender.com'
 
 
-# Initialize Flask extensions
-db = SQLAlchemy()
-oauth = OAuth()
-
 def create_app():
     """ Flask application factory """
     
     # Create Flask app load app.config
     app = Flask(__name__)
-    app.config.from_object('config')
+    app.config.from_pyfile('config.py')
     app.secret_key = app.config['APP_SECRET']
+
+    # Initialize Flask extensions
+    db = SQLAlchemy()
+    oauth = OAuth()
 
     # Setup Flask-SQLAlchemy
     db.init_app(app)
-
     oauth.init_app(app)
     oauth.register(
         name='pressingly',
