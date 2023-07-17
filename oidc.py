@@ -5,7 +5,7 @@ from authlib.integrations.flask_client import OAuth
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import login_required, UserManager, UserMixin
-from flask_login import LoginManager, login_user
+from flask_login import login_user
 
 import utils
 
@@ -23,8 +23,6 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object('config')
     app.secret_key = app.config['APP_SECRET']
-
-    login_manager = LoginManager(app)
 
     # Setup Flask-SQLAlchemy
     db.init_app(app)
