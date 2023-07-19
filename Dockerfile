@@ -9,4 +9,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["flask", "--app", "oidc", "run", "--host=0.0.0.0", "--port=5000", "--cert=adhoc", "--debug"]
+EXPOSE 5002
+CMD ["python", "oidc.py"]
